@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: symfony_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    command: php -S 0.0.0.0:8000 -t public
+  mercure:
+    image: dunglas/mercure
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: K3p9!vZ$2m@8xQw7#R1t6Fz4L0bYcN5*
+      MERCURE_SUBSCRIBER_JWT_KEY: K3p9!vZ$2m@8xQw7#R1t6Fz4L0bYcN5*
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins *
+        anonymous
+    command: /usr/bin/caddy run --config /etc/caddy/Caddyfile
+  db:
+    image: postgres:15
+    container_name: symfony_db
+    environment:
+      POSTGRES_DB: symfony
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: symfony
+    ports:
+      - "5432:5432"
